@@ -2,6 +2,7 @@ import type { ChatCompletionMessageParam } from "openai/resources/chat/completio
 
 import { createAIClient } from "@/lib/ai/client";
 import { buildSystemPrompt } from "@/lib/interview/prompts";
+import { retrieveQuestions } from "@/lib/rag/retriever";
 import type { ChatMessage, InterviewConfig } from "@/lib/interview/types";
 
 export const runtime = "nodejs";
@@ -14,9 +15,16 @@ interface ChatRequestBody {
 export async function POST(req: Request) {
   const { messages, config } = (await req.json()) as ChatRequestBody;
   const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
-  const system = buildSystemPrompt(
-    config ?? { persona: "technical", resume: "", jd: "" }
-  );
+
+  const safeConfig: InterviewConfig = config ?? {
+    persona: "technical",
+    resume: "",
+    jd: ""
+  };
+
+  // RAG：根据简历 + 岗位检索高频面试题，注入系统提示词作为追问参考。
+  const references = retrieveQuestions(safeConfig);
+  const system = buildSystemPrompt(safeConfig, references);
 
   const history: ChatCompletionMessageParam[] = [
     { role: "system", content: system },

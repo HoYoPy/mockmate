@@ -14,27 +14,30 @@
 
 - 多面试官人格：技术面、HR 面、压力面
 - 流式多轮追问
-- 一键生成结构化复盘报告
+- RAG 题库检索：根据简历 + 岗位检索高频面试题，增强追问方向
+- 结构化复盘：多维度评分 + 能力雷达图 + 改进建议
+- 语音输入（Web Speech API）
 - 基于 OpenAI 兼容接口，可切换 DeepSeek / 智谱 / 通义千问等模型
 
 ## 二、技术架构
 
 ```text
 浏览器 (Next.js 前端)
-   │  用户输入简历 / JD / 面试回答
+   │  用户输入简历 / JD / 面试回答 / 语音
    ▼
 Next.js App Router
-   │  POST /api/chat
+   ├── POST /api/chat        对话接口
+   └── POST /api/report      结构化复盘接口
    ▼
 /api/chat 路由（Node.js）
-   │  1. buildSystemPrompt：拼装面试官系统提示词
-   │  2. 组装历史消息
+   │  1. retrieveQuestions：根据简历 + JD 检索题库（RAG）
+   │  2. buildSystemPrompt：注入面试官提示词 + 检索结果
    │  3. 调用 OpenAI 兼容大模型 API（stream: true）
    ▼
 OpenAI 兼容接口（OpenAI / DeepSeek / 智谱 / 通义千问）
-   │  流式返回 token
+   │  流式返回 token / 返回结构化复盘 JSON
    ▼
-ReadableStream 逐字推送到前端 → 实时渲染
+ReadableStream 逐字渲染 + 能力雷达图展示
 ```
 
 | 层 | 技术选型 |
@@ -44,6 +47,8 @@ ReadableStream 逐字推送到前端 → 实时渲染
 | 样式 | Tailwind CSS |
 | AI 接入 | openai SDK（OpenAI 兼容接口） |
 | 流式响应 | ReadableStream（SSE 式逐字输出） |
+| 检索增强（RAG） | 内置题库 + 关键词评分检索，可扩展向量检索 |
+| 结构化复盘 | JSON 多维度评分 + 雷达图 |
 | 部署 | Vercel |
 
 ## 三、安装与运行
@@ -90,18 +95,23 @@ OPENAI_MODEL=glm-4-flash
 ```text
 mockmate/
 ├── app/
-│   ├── api/chat/route.ts   # 流式 AI 对话接口
+│   ├── api/chat/route.ts       # 流式 AI 对话接口（含 RAG）
+│   ├── api/report/route.ts     # 结构化复盘报告接口
 │   ├── globals.css
 │   ├── layout.tsx
 │   └── page.tsx
 ├── components/interview/
-│   └── interview-app.tsx   # 面试客户端主界面
+│   ├── interview-app.tsx       # 面试客户端主界面
+│   └── radar-chart.tsx         # 能力雷达图（SVG）
 ├── lib/
-│   ├── ai/client.ts        # OpenAI 兼容客户端
-│   └── interview/
-│       ├── prompts.ts      # 面试官系统提示词
-│       └── types.ts        # 类型定义
-├── .env.example            # 环境变量模板（密钥不提交）
+│   ├── ai/client.ts            # OpenAI 兼容客户端
+│   ├── interview/
+│   │   ├── prompts.ts          # 面试官系统提示词
+│   │   ├── question-bank.ts    # 内置面试题库
+│   │   ├── report.ts           # 复盘报告构建与解析
+│   │   └── types.ts            # 类型定义
+│   └── rag/retriever.ts        # 题库检索层（RAG）
+├── .env.example                # 环境变量模板（密钥不提交）
 ├── .nvmrc
 └── package.json
 ```
@@ -113,17 +123,17 @@ mockmate/
 - [x] 选择面试官风格：技术面 / HR 面 / 压力面
 - [x] 输入简历文字与岗位 JD
 - [x] 多轮对话式模拟面试（流式输出）
-- [x] 一键生成结构化复盘报告
+- [x] RAG 题库检索：根据简历 + 岗位检索高频面试题，增强追问
+- [x] 结构化复盘：多维度评分 + 能力雷达图 + 改进建议
+- [x] 语音输入（Web Speech API）
 - [x] 重新开始 / 清空会话
 
 ### P1（冲奖优先实现）
 
 - [ ] 简历文件上传解析（PDF / Word / 图片 OCR，多模态）
-- [ ] RAG 知识库：根据简历 + JD 检索高频面试题与公司资料
+- [ ] 向量化 RAG：embedding + 向量检索替代关键词检索
 - [ ] Agent 化追问策略：Function Calling / MCP 拆分「评估-选题-追问」
-- [ ] 面试评分 + 能力雷达图（技术、表达、逻辑、项目、匹配度）
 - [ ] 历史面试记录与成长曲线
-- [ ] 语音输入（Web Speech API）/ 语音转文字
 - [ ] 用户登录与数据持久化
 
 ### P2（加分项）

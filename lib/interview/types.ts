@@ -10,3 +10,26 @@ export interface ChatMessage {
   role: "user" | "assistant";
   content: string;
 }
+
+export type ReportDimensionKey =
+  | "technical"
+  | "project"
+  | "communication"
+  | "fit"
+  | "soft";
+
+export interface ReportDimension {
+  key: ReportDimensionKey;
+  label: string;
+  score: number;
+  comment: string;
+}
+
+export interface InterviewReport {
+  totalScore: number;
+  summary: string;
+  dimensions: ReportDimension[];
+  strengths: string[];
+  weaknesses: string[];
+  suggestions: string[];
+}

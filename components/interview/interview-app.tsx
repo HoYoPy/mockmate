@@ -2,9 +2,11 @@
 
 import { FormEvent, useRef, useState } from "react";
 
+import RadarChart from "@/components/interview/radar-chart";
 import type {
   ChatMessage,
   InterviewConfig,
+  InterviewReport,
   Persona
 } from "@/lib/interview/types";
 
@@ -22,7 +24,10 @@ export default function InterviewApp() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const [reporting, setReporting] = useState(false);
+  const [report, setReport] = useState<InterviewReport | null>(null);
+  const [listening, setListening] = useState(false);
+  const recognitionRef = useRef<{ stop: () => void } | null>(null);
 
   const config: InterviewConfig = { persona, resume, jd };
 
@@ -91,25 +96,103 @@ export default function InterviewApp() {
   function handleStart() {
     setStarted(true);
     setMessages([]);
+    setReport(null);
     void streamReply([]);
   }
 
-  function handleReport() {
-    if (loading) return;
-    const text =
-      "请现在基于以上面试过程，输出一份结构化复盘报告。";
-    const nextMessages: ChatMessage[] = [
-      ...messages,
-      { role: "user", content: text }
-    ];
-    setMessages(nextMessages);
-    void streamReply(nextMessages);
+  async function handleReport() {
+    if (loading || reporting || messages.length === 0) return;
+    setReporting(true);
+
+    try {
+      const res = await fetch("/api/report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages, config })
+      });
+
+      if (!res.ok) {
+        throw new Error(`生成报告失败：${res.status}`);
+      }
+
+      const data = (await res.json()) as InterviewReport;
+      setReport(data);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "未知错误";
+      setReport({
+        totalScore: 0,
+        summary: message,
+        dimensions: [],
+        strengths: [],
+        weaknesses: [],
+        suggestions: []
+      });
+    } finally {
+      setReporting(false);
+    }
   }
 
   function handleReset() {
     setStarted(false);
     setMessages([]);
     setInput("");
+    setReport(null);
+  }
+
+  function toggleVoice() {
+    const win = window as unknown as {
+      SpeechRecognition?: new () => {
+        lang: string;
+        interimResults: boolean;
+        onresult: (event: unknown) => void;
+        onend: () => void;
+        onerror: () => void;
+        start: () => void;
+        stop: () => void;
+      };
+      webkitSpeechRecognition?: new () => unknown;
+    };
+
+    const SpeechRecognition =
+      win.SpeechRecognition ??
+      (win.webkitSpeechRecognition as unknown as typeof win.SpeechRecognition);
+
+    if (!SpeechRecognition) {
+      alert("当前浏览器不支持语音输入，请使用 Chrome 或 Edge。");
+      return;
+    }
+
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      recognitionRef.current = null;
+      setListening(false);
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "zh-CN";
+    recognition.interimResults = false;
+    recognition.onresult = (event: unknown) => {
+      const resultEvent = event as {
+        results: Array<Array<{ transcript: string }>>;
+      };
+      const text = resultEvent.results[0]?.[0]?.transcript ?? "";
+      if (text) {
+        setInput((prev) => (prev ? `${prev}${text}` : text));
+      }
+    };
+    recognition.onend = () => {
+      setListening(false);
+      recognitionRef.current = null;
+    };
+    recognition.onerror = () => {
+      setListening(false);
+      recognitionRef.current = null;
+    };
+
+    recognition.start();
+    recognitionRef.current = recognition;
+    setListening(true);
   }
 
   return (
@@ -119,7 +202,7 @@ export default function InterviewApp() {
           MockMate · AI 智能面试教练
         </h1>
         <p className="mt-1 text-sm text-slate-500">
-          上传简历与岗位 JD，选择面试官风格，开始多轮模拟面试并生成复盘报告。
+          上传简历与岗位 JD，选择面试官风格，开始多轮模拟面试并生成能力雷达图复盘。
         </p>
       </header>
 
@@ -178,74 +261,157 @@ export default function InterviewApp() {
           </button>
         </section>
       ) : (
-        <section className="flex min-h-[70vh] flex-col rounded-xl border border-slate-200 bg-white shadow-sm">
-          <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3">
-            <span className="text-sm font-medium text-slate-700">
-              {PERSONAS.find((p) => p.value === persona)?.label} · 进行中
-            </span>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={handleReport}
-                disabled={loading || messages.length === 0}
-                className="rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                生成复盘报告
-              </button>
-              <button
-                type="button"
-                onClick={handleReset}
-                className="rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-600 transition hover:bg-slate-50"
-              >
-                重新开始
-              </button>
+        <div className="space-y-5">
+          <section className="flex min-h-[62vh] flex-col rounded-xl border border-slate-200 bg-white shadow-sm">
+            <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3">
+              <span className="text-sm font-medium text-slate-700">
+                {PERSONAS.find((p) => p.value === persona)?.label} · 进行中
+              </span>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={handleReport}
+                  disabled={loading || reporting || messages.length === 0}
+                  className="rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {reporting ? "正在生成报告…" : "结束并生成复盘报告"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-600 transition hover:bg-slate-50"
+                >
+                  重新开始
+                </button>
+              </div>
             </div>
-          </div>
 
-          <div className="flex-1 space-y-4 overflow-y-auto p-5">
-            {messages.length === 0 && (
-              <p className="text-sm text-slate-400">面试官正在准备开场……</p>
-            )}
-            {messages.map((message, index) => (
-              <div
-                key={index}
-                className={`flex ${
-                  message.role === "user" ? "justify-end" : "justify-start"
-                }`}
-              >
+            <div className="flex-1 space-y-4 overflow-y-auto p-5">
+              {messages.length === 0 && (
+                <p className="text-sm text-slate-400">面试官正在准备开场……</p>
+              )}
+              {messages.map((message, index) => (
                 <div
-                  className={`max-w-[80%] whitespace-pre-wrap rounded-xl px-4 py-2.5 text-sm leading-relaxed ${
-                    message.role === "user"
-                      ? "bg-blue-600 text-white"
-                      : "bg-slate-100 text-slate-800"
+                  key={index}
+                  className={`flex ${
+                    message.role === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
-                  {message.content || (loading ? "正在思考……" : "")}
+                  <div
+                    className={`max-w-[80%] whitespace-pre-wrap rounded-xl px-4 py-2.5 text-sm leading-relaxed ${
+                      message.role === "user"
+                        ? "bg-blue-600 text-white"
+                        : "bg-slate-100 text-slate-800"
+                    }`}
+                  >
+                    {message.content || (loading ? "正在思考……" : "")}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <form
+              onSubmit={handleSubmit}
+              className="flex items-center gap-2 border-t border-slate-200 p-4"
+            >
+              <button
+                type="button"
+                onClick={toggleVoice}
+                disabled={loading}
+                title="语音输入"
+                className={`shrink-0 rounded-lg border p-2.5 text-sm transition disabled:cursor-not-allowed disabled:opacity-50 ${
+                  listening
+                    ? "border-red-400 bg-red-50 text-red-600"
+                    : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                }`}
+              >
+                {listening ? "聆听中" : "语音"}
+              </button>
+              <input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="输入你的回答……"
+                className="flex-1 rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              />
+              <button
+                type="submit"
+                disabled={loading || !input.trim()}
+                className="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                发送
+              </button>
+            </form>
+          </section>
+
+          {report && (
+            <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold">面试复盘报告</h2>
+                  <p className="mt-1 text-sm text-slate-500">{report.summary}</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-3xl font-semibold text-blue-600">
+                    {report.totalScore}
+                  </span>
+                  <span className="text-sm text-slate-400"> / 100</span>
                 </div>
               </div>
-            ))}
-            <div ref={bottomRef} />
-          </div>
 
-          <form
-            onSubmit={handleSubmit}
-            className="flex items-center gap-2 border-t border-slate-200 p-4"
-          >
-            <input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="输入你的回答……"
-              className="flex-1 rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            />
-            <button
-              type="submit"
-              disabled={loading || !input.trim()}
-              className="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              发送
-            </button>
-          </form>
-        </section>
+              <div className="mt-6 grid gap-6 md:grid-cols-[auto_1fr]">
+                <RadarChart dimensions={report.dimensions} />
+                <div className="space-y-3">
+                  {report.dimensions.map((dimension) => (
+                    <div key={dimension.key}>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="font-medium">{dimension.label}</span>
+                        <span className="text-slate-500">{dimension.score}</span>
+                      </div>
+                      <div className="mt-1 h-2 rounded-full bg-slate-100">
+                        <div
+                          className="h-2 rounded-full bg-blue-600"
+                          style={{ width: `${dimension.score}%` }}
+                        />
+                      </div>
+                      {dimension.comment && (
+                        <p className="mt-1 text-xs text-slate-500">
+                          {dimension.comment}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-6 grid gap-5 md:grid-cols-3">
+                <div>
+                  <h3 className="text-sm font-medium text-emerald-600">亮点</h3>
+                  <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-600">
+                    {report.strengths.map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-amber-600">待改进</h3>
+                  <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-600">
+                    {report.weaknesses.map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-blue-600">改进建议</h3>
+                  <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-600">
+                    {report.suggestions.map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </section>
+          )}
+        </div>
       )}
     </main>
   );

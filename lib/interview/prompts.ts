@@ -8,21 +8,35 @@ const PERSONA_LABEL: Record<Persona, string> = {
 
 /**
  * 构建模拟面试的系统提示词。
- * 后续做 Agent 时，可以把「追问策略」拆成独立工具，并接入简历检索结果。
+ * references 是 RAG 检索到的参考题库，用于增强面试官的追问方向。
  */
-export function buildSystemPrompt(config: InterviewConfig): string {
+export function buildSystemPrompt(
+  config: InterviewConfig,
+  references: string[] = []
+): string {
   const persona = PERSONA_LABEL[config.persona];
 
   const parts = [
     `你是「${persona}」，正在对一名应届生候选人进行模拟面试。`,
-    "请像真实面试官一样：先做简短开场，然后围绕岗位职责和候选人简历逐题提问；根据回答进行针对性追问，控制节奏，一次只问一个问题。",
-    "面试过程中记录候选人的关键表现。当候选人要求复盘时，输出结构化复盘报告，包含：总体评分（0-100）、亮点、待改进点、改进建议。",
+    "面试流程：先做一句简短开场，然后围绕岗位职责和候选人简历设计 4-6 个递进问题；每次只问一个问题，并根据回答进行针对性追问。",
+    "追问策略：如果回答空泛，要求给出具体例子、数据和结果；如果回答完整，就切换到下一个维度；全程保持专业，不进行人身攻击。",
     config.jd ? `\n【岗位要求】\n${config.jd}` : "",
-    config.resume ? `\n【候选人简历】\n${config.resume}` : "",
-    config.persona === "stress"
-      ? "\n【风格要求】适当追问细节、制造压力场景，但保持专业，不进行人身攻击。"
-      : ""
+    config.resume ? `\n【候选人简历】\n${config.resume}` : ""
   ];
+
+  if (references.length > 0) {
+    parts.push(
+      `\n【检索到的高频面试题（作为追问参考，不要照搬，要自然融入对话）】\n${references
+        .map((question, index) => `${index + 1}. ${question}`)
+        .join("\n")}`
+    );
+  }
+
+  if (config.persona === "stress") {
+    parts.push(
+      "\n【风格要求】适当制造压力、追问细节和矛盾点，但只针对回答内容，不攻击个人。"
+    );
+  }
 
   return parts.filter(Boolean).join("\n");
 }
