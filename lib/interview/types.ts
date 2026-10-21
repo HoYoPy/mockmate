@@ -33,3 +33,15 @@ export interface InterviewReport {
   weaknesses: string[];
   suggestions: string[];
 }
+
+export interface Question {
+  id: string;
+  category: string;
+  job: string[];
+  persona: Persona[];
+  skills: string[];
+  difficulty: number;
+  keywords: string[];
+  question: string;
+  points: string[];
+}

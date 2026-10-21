@@ -14,7 +14,7 @@
 
 - 多面试官人格：技术面、HR 面、压力面
 - 流式多轮追问
-- RAG 题库检索：根据简历 + 岗位检索高频面试题，增强追问方向
+- 向量检索（RAG）：TF-IDF 余弦相似度 + 关键词重排，检索题目与考察点并增强追问
 - 结构化复盘：多维度评分 + 能力雷达图 + 改进建议
 - 语音输入（Web Speech API）
 - 基于 OpenAI 兼容接口，可切换 DeepSeek / 智谱 / 通义千问等模型
@@ -47,7 +47,7 @@ ReadableStream 逐字渲染 + 能力雷达图展示
 | 样式 | Tailwind CSS |
 | AI 接入 | openai SDK（OpenAI 兼容接口） |
 | 流式响应 | ReadableStream（SSE 式逐字输出） |
-| 检索增强（RAG） | 内置题库 + 关键词评分检索，可扩展向量检索 |
+| 检索增强（RAG） | 内置题库 + 字符 n-gram TF-IDF 向量检索 + 关键词重排 |
 | 结构化复盘 | JSON 多维度评分 + 雷达图 |
 | 部署 | Vercel |
 
@@ -107,10 +107,12 @@ mockmate/
 │   ├── ai/client.ts            # OpenAI 兼容客户端
 │   ├── interview/
 │   │   ├── prompts.ts          # 面试官系统提示词
-│   │   ├── question-bank.ts    # 内置面试题库
 │   │   ├── report.ts           # 复盘报告构建与解析
 │   │   └── types.ts            # 类型定义
-│   └── rag/retriever.ts        # 题库检索层（RAG）
+│   └── rag/
+│       ├── index.ts            # 检索入口（加载题库）
+│       └── vector-retriever.ts # TF-IDF 向量检索
+├── data/question-bank.json     # 结构化面试题库
 ├── .env.example                # 环境变量模板（密钥不提交）
 ├── .nvmrc
 └── package.json

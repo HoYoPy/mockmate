@@ -2,7 +2,7 @@ import type { ChatCompletionMessageParam } from "openai/resources/chat/completio
 
 import { createAIClient } from "@/lib/ai/client";
 import { buildSystemPrompt } from "@/lib/interview/prompts";
-import { retrieveQuestions } from "@/lib/rag/retriever";
+import { retrieveQuestions } from "@/lib/rag";
 import type { ChatMessage, InterviewConfig } from "@/lib/interview/types";
 
 export const runtime = "nodejs";

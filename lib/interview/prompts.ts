@@ -12,7 +12,7 @@ const PERSONA_LABEL: Record<Persona, string> = {
  */
 export function buildSystemPrompt(
   config: InterviewConfig,
-  references: string[] = []
+  references: { question: string; points?: string[] }[] = []
 ): string {
   const persona = PERSONA_LABEL[config.persona];
 
@@ -26,8 +26,13 @@ export function buildSystemPrompt(
 
   if (references.length > 0) {
     parts.push(
-      `\n【检索到的高频面试题（作为追问参考，不要照搬，要自然融入对话）】\n${references
-        .map((question, index) => `${index + 1}. ${question}`)
+      `\n【检索到的高频面试题（围绕考察点自然追问，不要照搬原题）】\n${references
+        .map((item, index) => {
+          const points = item.points && item.points.length > 0
+            ? `（考察点：${item.points.join("、")}）`
+            : "";
+          return `${index + 1}. ${item.question}${points}`;
+        })
         .join("\n")}`
     );
   }
