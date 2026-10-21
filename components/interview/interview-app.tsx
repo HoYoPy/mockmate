@@ -43,7 +43,14 @@ export default function InterviewApp() {
       });
 
       if (!res.ok || !res.body) {
-        throw new Error(`请求失败：${res.status}`);
+        let message = `请求失败：${res.status}`;
+        try {
+          const data = await res.json();
+          if (data?.error) message = data.error;
+        } catch {
+          // 忽略非 JSON 响应
+        }
+        throw new Error(message);
       }
 
       const reader = res.body.getReader();
@@ -112,7 +119,14 @@ export default function InterviewApp() {
       });
 
       if (!res.ok) {
-        throw new Error(`生成报告失败：${res.status}`);
+        let message = `生成报告失败：${res.status}`;
+        try {
+          const data = await res.json();
+          if (data?.error) message = data.error;
+        } catch {
+          // 忽略非 JSON 响应
+        }
+        throw new Error(message);
       }
 
       const data = (await res.json()) as InterviewReport;

@@ -10,29 +10,34 @@ interface ReportRequestBody {
 }
 
 export async function POST(req: Request) {
-  const { messages, config } = (await req.json()) as ReportRequestBody;
-  const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
+  try {
+    const { messages, config } = (await req.json()) as ReportRequestBody;
+    const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
 
-  const transcript = messages
-    .map((message) => {
-      const speaker = message.role === "user" ? "候选人" : "面试官";
-      return `${speaker}：${message.content}`;
-    })
-    .join("\n");
+    const transcript = messages
+      .map((message) => {
+        const speaker = message.role === "user" ? "候选人" : "面试官";
+        return `${speaker}：${message.content}`;
+      })
+      .join("\n");
 
-  const completion = await createAIClient().chat.completions.create({
-    model,
-    temperature: 0.3,
-    messages: [
-      {
-        role: "user",
-        content: buildReportPrompt(config, transcript)
-      }
-    ]
-  });
+    const completion = await createAIClient().chat.completions.create({
+      model,
+      temperature: 0.3,
+      messages: [
+        {
+          role: "user",
+          content: buildReportPrompt(config, transcript)
+        }
+      ]
+    });
 
-  const raw = completion.choices[0]?.message?.content ?? "";
-  const report = parseReport(raw);
+    const raw = completion.choices[0]?.message?.content ?? "";
+    const report = parseReport(raw);
 
-  return Response.json(report);
+    return Response.json(report);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "未知错误";
+    return Response.json({ error: message }, { status: 500 });
+  }
 }

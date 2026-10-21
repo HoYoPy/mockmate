@@ -7,7 +7,7 @@ import OpenAI from "openai";
 export function createAIClient(): OpenAI {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
-    throw new Error("缺少 OPENAI_API_KEY，请在 .env.local 中配置");
+    throw new Error("缺少 OPENAI_API_KEY，请在环境变量中配置");
   }
 
   return new OpenAI({
