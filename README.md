@@ -15,6 +15,7 @@
 - 多面试官人格：技术面、HR 面、压力面
 - 流式多轮追问
 - 向量检索（RAG）：TF-IDF 余弦相似度 + 关键词重排，检索题目与考察点并增强追问
+- Agent 化面试流程：evaluate_answer / pick_next_question / finish_interview 工具调用，按“评估→选题→追问→收尾”推进
 - 结构化复盘：多维度评分 + 能力雷达图 + 改进建议
 - 语音输入（Web Speech API）
 - 基于 OpenAI 兼容接口，可切换 DeepSeek / 智谱 / 通义千问等模型
@@ -95,7 +96,7 @@ OPENAI_MODEL=glm-4-flash
 ```text
 mockmate/
 ├── app/
-│   ├── api/chat/route.ts       # 流式 AI 对话接口（含 RAG）
+│   ├── api/chat/route.ts       # Agent 对话接口（工具调用 + RAG）
 │   ├── api/report/route.ts     # 结构化复盘报告接口
 │   ├── globals.css
 │   ├── layout.tsx
@@ -107,6 +108,7 @@ mockmate/
 │   ├── ai/client.ts            # OpenAI 兼容客户端
 │   ├── interview/
 │   │   ├── prompts.ts          # 面试官系统提示词
+│   │   ├── agent.ts            # 工具调用 Agent 循环
 │   │   ├── report.ts           # 复盘报告构建与解析
 │   │   └── types.ts            # 类型定义
 │   └── rag/
@@ -133,8 +135,8 @@ mockmate/
 ### P1（冲奖优先实现）
 
 - [ ] 简历文件上传解析（PDF / Word / 图片 OCR，多模态）
-- [ ] 向量化 RAG：embedding + 向量检索替代关键词检索
-- [ ] Agent 化追问策略：Function Calling / MCP 拆分「评估-选题-追问」
+- [x] 向量化 RAG：字符 n-gram TF-IDF 向量检索 + 关键词重排（bge 语义 embedding 待接）
+- [x] Agent 化追问策略：evaluate_answer / pick_next_question / finish_interview 工具调用
 - [ ] 历史面试记录与成长曲线
 - [ ] 用户登录与数据持久化
 
