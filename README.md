@@ -17,7 +17,8 @@
 - 向量检索（RAG）：TF-IDF 余弦相似度 + 关键词重排，检索题目与考察点并增强追问
 - Agent 化面试流程：evaluate_answer / pick_next_question / finish_interview 工具调用，按“评估→选题→追问→收尾”推进
 - 结构化复盘：多维度评分 + 能力雷达图 + 改进建议
-- 语音输入（Web Speech API）
+- 多模态输入：简历文件上传解析（PDF/DOCX/TXT）+ JD 截图 OCR（端侧 Tesseract.js）
+- 语音闭环：语音输入（Web Speech API）+ 面试官语音朗读（TTS）
 - 基于 OpenAI 兼容接口，可切换 DeepSeek / 智谱 / 通义千问等模型
 
 ## 二、技术架构
@@ -50,6 +51,9 @@ ReadableStream 逐字渲染 + 能力雷达图展示
 | 流式响应 | ReadableStream（SSE 式逐字输出） |
 | 检索增强（RAG） | 内置题库 + 字符 n-gram TF-IDF 向量检索 + 关键词重排 |
 | 结构化复盘 | JSON 多维度评分 + 雷达图 |
+| 文档解析 | mammoth（DOCX）+ pdf-parse（PDF） |
+| 端侧 OCR | tesseract.js（图片识别，免视觉模型） |
+| 语音 | Web Speech API（输入）+ SpeechSynthesis（朗读） |
 | 部署 | Vercel |
 
 ## 三、安装与运行
@@ -97,6 +101,7 @@ OPENAI_MODEL=glm-4-flash
 mockmate/
 ├── app/
 │   ├── api/chat/route.ts       # Agent 对话接口（工具调用 + RAG）
+│   ├── api/parse-resume/route.ts # 简历文件解析接口
 │   ├── api/report/route.ts     # 结构化复盘报告接口
 │   ├── globals.css
 │   ├── layout.tsx
@@ -115,6 +120,7 @@ mockmate/
 │       ├── index.ts            # 检索入口（加载题库）
 │       └── vector-retriever.ts # TF-IDF 向量检索
 ├── data/question-bank.json     # 结构化面试题库
+├── types/pdf-parse.d.ts        # pdf-parse 类型声明
 ├── .env.example                # 环境变量模板（密钥不提交）
 ├── .nvmrc
 └── package.json
@@ -129,12 +135,12 @@ mockmate/
 - [x] 多轮对话式模拟面试（流式输出）
 - [x] RAG 题库检索：根据简历 + 岗位检索高频面试题，增强追问
 - [x] 结构化复盘：多维度评分 + 能力雷达图 + 改进建议
-- [x] 语音输入（Web Speech API）
+- [x] 语音输入（Web Speech API）+ 面试官语音朗读（TTS）
 - [x] 重新开始 / 清空会话
 
 ### P1（冲奖优先实现）
 
-- [ ] 简历文件上传解析（PDF / Word / 图片 OCR，多模态）
+- [x] 简历文件上传解析（PDF/DOCX/TXT）+ JD 截图 OCR（tesseract.js）
 - [x] 向量化 RAG：字符 n-gram TF-IDF 向量检索 + 关键词重排（bge 语义 embedding 待接）
 - [x] Agent 化追问策略：evaluate_answer / pick_next_question / finish_interview 工具调用
 - [ ] 历史面试记录与成长曲线

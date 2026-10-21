@@ -28,6 +28,10 @@ export default function InterviewApp() {
   const [report, setReport] = useState<InterviewReport | null>(null);
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef<{ stop: () => void } | null>(null);
+  const [uploadingResume, setUploadingResume] = useState(false);
+  const [recognizingImage, setRecognizingImage] = useState(false);
+  const resumeFileRef = useRef<HTMLInputElement>(null);
+  const jdImageRef = useRef<HTMLInputElement>(null);
 
   const config: InterviewConfig = { persona, resume, jd };
 
@@ -209,6 +213,60 @@ export default function InterviewApp() {
     setListening(true);
   }
 
+  async function handleResumeFile(file: File) {
+    setUploadingResume(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/parse-resume", {
+        method: "POST",
+        body: formData
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "解析失败");
+      setResume((prev) => (prev ? `${prev}\n\n${data.text}` : data.text));
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "解析失败");
+    } finally {
+      setUploadingResume(false);
+    }
+  }
+
+  async function handleJdImage(file: File) {
+    setRecognizingImage(true);
+    try {
+      const Tesseract = (await import("tesseract.js")).default as {
+        createWorker: (lang: string) => Promise<{
+          recognize: (image: File) => Promise<{ data: { text: string } }>;
+          terminate: () => Promise<unknown>;
+        }>;
+      };
+      const worker = await Tesseract.createWorker("chi_sim");
+      const result = await worker.recognize(file);
+      await worker.terminate();
+      const text = (result.data?.text ?? "").trim();
+      if (!text) throw new Error("未识别到文字");
+      setJd((prev) => (prev ? `${prev}\n\n${text}` : text));
+    } catch (error) {
+      alert(
+        error instanceof Error
+          ? error.message
+          : "图片识别失败，请使用 Chrome/Edge 并保持联网"
+      );
+    } finally {
+      setRecognizingImage(false);
+    }
+  }
+
+  function speak(text: string) {
+    if (!("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "zh-CN";
+    utterance.rate = 1;
+    window.speechSynthesis.speak(utterance);
+  }
+
   return (
     <main className="mx-auto flex min-h-screen max-w-5xl flex-col px-4 py-8">
       <header className="mb-6">
@@ -246,24 +304,70 @@ export default function InterviewApp() {
           </div>
 
           <div className="grid gap-5 sm:grid-cols-2">
-            <label className="block">
-              <span className="text-sm font-medium text-slate-700">我的简历</span>
+            <div className="block">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-slate-700">我的简历</span>
+                <div className="flex items-center gap-2">
+                  <input
+                    ref={resumeFileRef}
+                    type="file"
+                    accept=".txt,.md,.docx,.pdf"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) void handleResumeFile(file);
+                      e.target.value = "";
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => resumeFileRef.current?.click()}
+                    disabled={uploadingResume}
+                    className="rounded-md border border-slate-200 px-2 py-1 text-xs text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {uploadingResume ? "解析中…" : "上传文件"}
+                  </button>
+                </div>
+              </div>
               <textarea
                 value={resume}
                 onChange={(e) => setResume(e.target.value)}
                 placeholder="粘贴简历文字：学校、专业、技能、项目经历、实习经历……"
                 className="mt-2 h-40 w-full resize-none rounded-lg border border-slate-200 p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
-            </label>
-            <label className="block">
-              <span className="text-sm font-medium text-slate-700">岗位 JD</span>
+            </div>
+            <div className="block">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-slate-700">岗位 JD</span>
+                <div className="flex items-center gap-2">
+                  <input
+                    ref={jdImageRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) void handleJdImage(file);
+                      e.target.value = "";
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => jdImageRef.current?.click()}
+                    disabled={recognizingImage}
+                    className="rounded-md border border-slate-200 px-2 py-1 text-xs text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {recognizingImage ? "识别中…" : "识别图片"}
+                  </button>
+                </div>
+              </div>
               <textarea
                 value={jd}
                 onChange={(e) => setJd(e.target.value)}
                 placeholder="粘贴目标岗位描述，例如：前端开发工程师，要求掌握 React、TypeScript……"
                 className="mt-2 h-40 w-full resize-none rounded-lg border border-slate-200 p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
-            </label>
+            </div>
           </div>
 
           <button
@@ -307,10 +411,20 @@ export default function InterviewApp() {
               {messages.map((message, index) => (
                 <div
                   key={index}
-                  className={`flex ${
+                  className={`flex items-start gap-2 ${
                     message.role === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
+                  {message.role === "assistant" && message.content && (
+                    <button
+                      type="button"
+                      onClick={() => speak(message.content)}
+                      title="朗读"
+                      className="mt-1 shrink-0 rounded-md border border-slate-200 p-1.5 text-xs text-slate-500 transition hover:bg-slate-50"
+                    >
+                      朗读
+                    </button>
+                  )}
                   <div
                     className={`max-w-[80%] whitespace-pre-wrap rounded-xl px-4 py-2.5 text-sm leading-relaxed ${
                       message.role === "user"

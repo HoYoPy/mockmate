@@ -126,6 +126,12 @@ export async function runAgentLoop(
 
     working.push(message as ChatCompletionMessageParam);
 
+    console.log(
+      `[agent:step:${step}] tools=${toolCalls
+        .map((call) => call.function.name)
+        .join(",")}`
+    );
+
     for (const call of toolCalls) {
       let args: Record<string, unknown> = {};
       try {
