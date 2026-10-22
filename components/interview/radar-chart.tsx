@@ -65,6 +65,7 @@ export default function RadarChart({ dimensions }: RadarChartProps) {
 
       <polygon
         points={dataPoints}
+        className="radar-data"
         fill="rgba(37, 99, 235, 0.18)"
         stroke="#2563eb"
         strokeWidth="2"

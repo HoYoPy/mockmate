@@ -19,6 +19,7 @@
 - 结构化复盘：多维度评分 + 能力雷达图 + 改进建议
 - 内容安全：敏感信息脱敏 + 违规内容拦截 + 不友好用语过滤
 - 模型工程：主模型失败自动降级、报告 JSON 强约束与重试、SSE 流式 + 长度控制
+- 前端工程化：组件拆分、错误边界与加载态、报告懒加载、移动端响应式、思考状态可视化
 - 多模态输入：简历文件上传解析（PDF/DOCX/TXT）+ JD 截图 OCR（端侧 Tesseract.js）
 - 语音闭环：语音输入（Web Speech API）+ 面试官语音朗读（TTS）
 - 基于 OpenAI 兼容接口，可切换 DeepSeek / 智谱 / 通义千问等模型
@@ -108,12 +109,19 @@ mockmate/
 │   ├── api/chat/route.ts       # Agent 对话接口（工具调用 + RAG）
 │   ├── api/parse-resume/route.ts # 简历文件解析接口
 │   ├── api/report/route.ts     # 结构化复盘报告接口
+│   ├── error.tsx               # 页面错误边界
+│   ├── loading.tsx             # 页面加载态
 │   ├── globals.css
 │   ├── layout.tsx
 │   └── page.tsx
 ├── components/interview/
-│   ├── interview-app.tsx       # 面试客户端主界面
-│   └── radar-chart.tsx         # 能力雷达图（SVG）
+│   ├── interview-app.tsx       # 容器组件（状态与异步逻辑）
+│   ├── interview-setup.tsx     # 面试配置页
+│   ├── chat-panel.tsx          # 对话面板
+│   ├── message-bubble.tsx      # 消息气泡
+│   ├── report-panel.tsx        # 复盘报告（懒加载）
+│   ├── radar-chart.tsx         # 能力雷达图（SVG）
+│   └── constants.ts            # 面试官风格常量
 ├── lib/
 │   ├── ai/client.ts            # OpenAI 兼容客户端
 │   ├── ai/guard.ts             # 内容安全过滤
