@@ -3,7 +3,7 @@ import type {
   ChatCompletionTool
 } from "openai/resources/chat/completions";
 
-import { createAIClient } from "@/lib/ai/client";
+import type OpenAI from "openai";
 import type { RetrievedQuestion } from "@/lib/rag/vector-retriever";
 
 const TOOLS: ChatCompletionTool[] = [
@@ -97,11 +97,11 @@ function executeTool(
 }
 
 export async function runAgentLoop(
+  client: OpenAI,
+  model: string,
   messages: ChatCompletionMessageParam[],
-  references: RetrievedQuestion[],
-  model: string
+  references: RetrievedQuestion[]
 ): Promise<string> {
-  const client = createAIClient();
   const working = [...messages];
   const maxSteps = 4;
 

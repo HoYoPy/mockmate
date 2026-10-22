@@ -1,17 +1,73 @@
 import OpenAI from "openai";
 
-/**
- * 创建 OpenAI 兼容客户端。
- * 通过 OPENAI_BASE_URL 可切换 DeepSeek、智谱、通义千问等兼容服务。
- */
-export function createAIClient(): OpenAI {
+export interface ModelConfig {
+  apiKey: string;
+  baseURL?: string;
+  model: string;
+}
+
+function getPrimaryConfig(): ModelConfig {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
     throw new Error("缺少 OPENAI_API_KEY，请在环境变量中配置");
   }
 
-  return new OpenAI({
+  return {
     apiKey,
-    baseURL: process.env.OPENAI_BASE_URL || undefined
+    baseURL: process.env.OPENAI_BASE_URL || undefined,
+    model: process.env.OPENAI_MODEL || "gpt-4o-mini"
+  };
+}
+
+function getFallbackConfigs(): ModelConfig[] {
+  const raw = process.env.OPENAI_FALLBACKS;
+  if (!raw) return [];
+
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed
+      .filter(
+        (item): item is { apiKey: string; baseURL?: string; model: string } =>
+          Boolean(item && item.apiKey && item.model)
+      )
+      .map((item) => ({
+        apiKey: item.apiKey,
+        baseURL: item.baseURL,
+        model: item.model
+      }));
+  } catch {
+    return [];
+  }
+}
+
+export function getModelConfigs(): ModelConfig[] {
+  return [getPrimaryConfig(), ...getFallbackConfigs()];
+}
+
+export function createClient(config: ModelConfig): OpenAI {
+  return new OpenAI({
+    apiKey: config.apiKey,
+    baseURL: config.baseURL || undefined,
+    timeout: 30_000,
+    maxRetries: 0
   });
+}
+
+export async function runWithFallback<T>(
+  fn: (client: OpenAI, model: string) => Promise<T>
+): Promise<T> {
+  const configs = getModelConfigs();
+  let lastError: unknown;
+
+  for (const config of configs) {
+    try {
+      return await fn(createClient(config), config.model);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError;
 }

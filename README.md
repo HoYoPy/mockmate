@@ -17,6 +17,8 @@
 - 向量检索（RAG）：TF-IDF 余弦相似度 + 关键词重排，检索题目与考察点并增强追问
 - Agent 化面试流程：evaluate_answer / pick_next_question / finish_interview 工具调用，按“评估→选题→追问→收尾”推进
 - 结构化复盘：多维度评分 + 能力雷达图 + 改进建议
+- 内容安全：敏感信息脱敏 + 违规内容拦截 + 不友好用语过滤
+- 模型工程：主模型失败自动降级、报告 JSON 强约束与重试、SSE 流式 + 长度控制
 - 多模态输入：简历文件上传解析（PDF/DOCX/TXT）+ JD 截图 OCR（端侧 Tesseract.js）
 - 语音闭环：语音输入（Web Speech API）+ 面试官语音朗读（TTS）
 - 基于 OpenAI 兼容接口，可切换 DeepSeek / 智谱 / 通义千问等模型
@@ -54,6 +56,8 @@ ReadableStream 逐字渲染 + 能力雷达图展示
 | 文档解析 | mammoth（DOCX）+ pdf-parse（PDF） |
 | 端侧 OCR | tesseract.js（图片识别，免视觉模型） |
 | 语音 | Web Speech API（输入）+ SpeechSynthesis（朗读） |
+| 内容安全 | guard：敏感信息脱敏 + 违规拦截 + 不友好用语过滤 |
+| 可靠性 | 多模型降级 + 报告 JSON 强约束与重试 |
 | 部署 | Vercel |
 
 ## 三、安装与运行
@@ -67,6 +71,7 @@ ReadableStream 逐字渲染 + 能力雷达图展示
 | `OPENAI_API_KEY` | 是 | 大模型 API 密钥 |
 | `OPENAI_BASE_URL` | 否 | 默认 `https://api.openai.com/v1`，DeepSeek/智谱等需替换 |
 | `OPENAI_MODEL` | 否 | 默认 `gpt-4o-mini` |
+| `OPENAI_FALLBACKS` | 否 | 主模型失败时的备用模型，JSON 数组 |
 
 **本地运行**
 
@@ -111,6 +116,7 @@ mockmate/
 │   └── radar-chart.tsx         # 能力雷达图（SVG）
 ├── lib/
 │   ├── ai/client.ts            # OpenAI 兼容客户端
+│   ├── ai/guard.ts             # 内容安全过滤
 │   ├── interview/
 │   │   ├── prompts.ts          # 面试官系统提示词
 │   │   ├── agent.ts            # 工具调用 Agent 循环
@@ -151,7 +157,7 @@ mockmate/
 - [ ] 岗位 JD 联网检索
 - [ ] 群面模拟 / 多面试官角色
 - [ ] 浏览器端本地模型（Transformers.js / WebGPU）
-- [ ] 内容安全过滤与隐私保护说明
+- [x] 内容安全过滤与隐私保护（敏感信息脱敏 + 违规拦截）
 
 ## 六、团队信息
 

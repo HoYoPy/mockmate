@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 
 import RadarChart from "@/components/interview/radar-chart";
 import type {
@@ -33,6 +33,13 @@ export default function InterviewApp() {
   const resumeFileRef = useRef<HTMLInputElement>(null);
   const jdImageRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    if (!("speechSynthesis" in window)) return;
+    const loadVoices = () => window.speechSynthesis.getVoices();
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+  }, []);
+
   const config: InterviewConfig = { persona, resume, jd };
 
   async function streamReply(nextMessages: ChatMessage[]) {
@@ -60,20 +67,40 @@ export default function InterviewApp() {
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value, { stream: true });
+      let buffer = "";
+      const append = (text: string) => {
         setMessages((prev) => {
           const copy = [...prev];
           const last = copy[copy.length - 1];
-          copy[copy.length - 1] = {
-            ...last,
-            content: last.content + chunk
-          };
+          copy[copy.length - 1] = { ...last, content: last.content + text };
           return copy;
         });
+      };
+
+      const consumeEvents = (chunk: string) => {
+        const events = chunk.split("\n\n");
+        for (const event of events) {
+          const dataLine = event.split("\n").find((line) => line.startsWith("data: "));
+          if (!dataLine) continue;
+          try {
+            const text = JSON.parse(dataLine.slice(6)) as string;
+            if (text) append(text);
+          } catch {
+            // 忽略无法解析的事件
+          }
+        }
+      };
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const boundary = buffer.lastIndexOf("\n\n");
+        if (boundary === -1) continue;
+        consumeEvents(buffer.slice(0, boundary + 2));
+        buffer = buffer.slice(boundary + 2);
       }
+      if (buffer) consumeEvents(buffer);
     } catch (error) {
       const message = error instanceof Error ? error.message : "未知错误";
       setMessages((prev) => {
@@ -262,8 +289,25 @@ export default function InterviewApp() {
     if (!("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "zh-CN";
-    utterance.rate = 1;
+    const voices = window.speechSynthesis.getVoices();
+    const zh = voices.filter((voice) => voice.lang.toLowerCase().startsWith("zh"));
+    const preferred = [
+      "xiaoxiao", "xiaoyi", "yunxi", "yunyang", "natural", "online",
+      "普通话", "中文", "zh-cn"
+    ];
+    const pool = zh.length > 0 ? zh : voices;
+    let voice = pool[0] ?? null;
+    for (const key of preferred) {
+      const match = pool.find((item) => item.name.toLowerCase().includes(key));
+      if (match) {
+        voice = match;
+        break;
+      }
+    }
+    if (voice) utterance.voice = voice;
+    utterance.lang = voice?.lang ?? "zh-CN";
+    utterance.rate = 0.98;
+    utterance.pitch = 1;
     window.speechSynthesis.speak(utterance);
   }
 
