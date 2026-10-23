@@ -45,3 +45,18 @@ export interface Question {
   question: string;
   points: string[];
 }
+
+export interface GapAnalysis {
+  matchScore: number;
+  summary: string;
+  matchedSkills: string[];
+  missingSkills: string[];
+  likelyQuestions: string[];
+  suggestions: string[];
+}
+
+export interface HistoryRecord {
+  date: string;
+  totalScore: number;
+  dimensions: { key: ReportDimensionKey; label: string; score: number }[];
+}

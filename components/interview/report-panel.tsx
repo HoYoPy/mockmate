@@ -1,13 +1,15 @@
 "use client";
 
 import RadarChart from "@/components/interview/radar-chart";
-import type { InterviewReport } from "@/lib/interview/types";
+import HistoryChart from "@/components/interview/history-chart";
+import type { HistoryRecord, InterviewReport } from "@/lib/interview/types";
 
 interface ReportPanelProps {
   report: InterviewReport;
+  history: HistoryRecord[];
 }
 
-export default function ReportPanel({ report }: ReportPanelProps) {
+export default function ReportPanel({ report, history }: ReportPanelProps) {
   return (
     <section className="fade-in-up rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
       <div className="flex items-start justify-between">
@@ -72,6 +74,13 @@ export default function ReportPanel({ report }: ReportPanelProps) {
               <li key={index}>{item}</li>
             ))}
           </ul>
+        </div>
+      </div>
+
+      <div className="mt-6 border-t border-slate-100 pt-5">
+        <h3 className="text-sm font-medium text-slate-700">能力成长曲线</h3>
+        <div className="mt-3">
+          <HistoryChart history={history} />
         </div>
       </div>
     </section>

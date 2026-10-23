@@ -20,6 +20,8 @@
 - 内容安全：敏感信息脱敏 + 违规内容拦截 + 不友好用语过滤
 - 模型工程：主模型失败自动降级、报告 JSON 强约束与重试、SSE 流式 + 长度控制
 - 前端工程化：组件拆分、错误边界与加载态、报告懒加载、移动端响应式、思考状态可视化
+- 简历 × 岗位差距分析：匹配度、缺口技能、可能被问到的问题
+- 能力成长曲线：本地保存历史面试成绩并绘制趋势
 - 多模态输入：简历文件上传解析（PDF/DOCX/TXT）+ JD 截图 OCR（端侧 Tesseract.js）
 - 语音闭环：语音输入（Web Speech API）+ 面试官语音朗读（TTS）
 - 基于 OpenAI 兼容接口，可切换 DeepSeek / 智谱 / 通义千问等模型
@@ -107,6 +109,7 @@ OPENAI_MODEL=glm-4-flash
 mockmate/
 ├── app/
 │   ├── api/chat/route.ts       # Agent 对话接口（工具调用 + RAG）
+│   ├── api/gap-analysis/route.ts # 简历 × 岗位差距分析接口
 │   ├── api/parse-resume/route.ts # 简历文件解析接口
 │   ├── api/report/route.ts     # 结构化复盘报告接口
 │   ├── error.tsx               # 页面错误边界
@@ -120,6 +123,8 @@ mockmate/
 │   ├── chat-panel.tsx          # 对话面板
 │   ├── message-bubble.tsx      # 消息气泡
 │   ├── report-panel.tsx        # 复盘报告（懒加载）
+│   ├── gap-analysis.tsx        # 差距分析面板
+│   ├── history-chart.tsx       # 成长曲线
 │   ├── radar-chart.tsx         # 能力雷达图（SVG）
 │   └── constants.ts            # 面试官风格常量
 ├── lib/
@@ -128,11 +133,14 @@ mockmate/
 │   ├── interview/
 │   │   ├── prompts.ts          # 面试官系统提示词
 │   │   ├── agent.ts            # 工具调用 Agent 循环
+│   │   ├── gap.ts              # 差距分析构建与解析
 │   │   ├── report.ts           # 复盘报告构建与解析
 │   │   └── types.ts            # 类型定义
-│   └── rag/
-│       ├── index.ts            # 检索入口（加载题库）
-│       └── vector-retriever.ts # TF-IDF 向量检索
+│   ├── rag/
+│   │   ├── index.ts            # 检索入口（加载题库）
+│   │   └── vector-retriever.ts # TF-IDF 向量检索
+│   └── storage/history.ts      # 历史成绩本地存储
+├── docs/技术文档-要点.md        # 技术文档写作要点
 ├── data/question-bank.json     # 结构化面试题库
 ├── types/pdf-parse.d.ts        # pdf-parse 类型声明
 ├── .env.example                # 环境变量模板（密钥不提交）
@@ -157,7 +165,7 @@ mockmate/
 - [x] 简历文件上传解析（PDF/DOCX/TXT）+ JD 截图 OCR（tesseract.js）
 - [x] 向量化 RAG：字符 n-gram TF-IDF 向量检索 + 关键词重排（bge 语义 embedding 待接）
 - [x] Agent 化追问策略：evaluate_answer / pick_next_question / finish_interview 工具调用
-- [ ] 历史面试记录与成长曲线
+- [x] 历史面试记录与成长曲线（localStorage）
 - [ ] 用户登录与数据持久化
 
 ### P2（加分项）

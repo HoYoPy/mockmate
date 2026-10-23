@@ -5,9 +5,13 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 
 import ChatPanel from "@/components/interview/chat-panel";
 import { PERSONAS } from "@/components/interview/constants";
+import GapAnalysisPanel from "@/components/interview/gap-analysis";
 import InterviewSetup from "@/components/interview/interview-setup";
+import { loadHistory, saveHistory } from "@/lib/storage/history";
 import type {
   ChatMessage,
+  GapAnalysis,
+  HistoryRecord,
   InterviewConfig,
   InterviewReport,
   Persona
@@ -36,6 +40,9 @@ export default function InterviewApp() {
   const [listening, setListening] = useState(false);
   const [uploadingResume, setUploadingResume] = useState(false);
   const [recognizingImage, setRecognizingImage] = useState(false);
+  const [gap, setGap] = useState<GapAnalysis | null>(null);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [history, setHistory] = useState<HistoryRecord[]>([]);
   const recognitionRef = useRef<{ stop: () => void } | null>(null);
 
   useEffect(() => {
@@ -43,6 +50,10 @@ export default function InterviewApp() {
     const loadVoices = () => window.speechSynthesis.getVoices();
     loadVoices();
     window.speechSynthesis.onvoiceschanged = loadVoices;
+  }, []);
+
+  useEffect(() => {
+    setHistory(loadHistory());
   }, []);
 
   const config: InterviewConfig = { persona, resume, jd };
@@ -169,6 +180,17 @@ export default function InterviewApp() {
 
       const data = (await res.json()) as InterviewReport;
       setReport(data);
+      setHistory(
+        saveHistory({
+          date: new Date().toISOString(),
+          totalScore: data.totalScore,
+          dimensions: data.dimensions.map((dimension) => ({
+            key: dimension.key,
+            label: dimension.label,
+            score: dimension.score
+          }))
+        })
+      );
     } catch (error) {
       const message = error instanceof Error ? error.message : "未知错误";
       setReport({
@@ -189,6 +211,40 @@ export default function InterviewApp() {
     setMessages([]);
     setInput("");
     setReport(null);
+  }
+
+  async function handleGapAnalysis() {
+    if (!resume.trim() && !jd.trim()) {
+      alert("请先填写简历或岗位 JD");
+      return;
+    }
+
+    setAnalyzing(true);
+    try {
+      const res = await fetch("/api/gap-analysis", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ config })
+      });
+
+      if (!res.ok) {
+        let message = `分析失败：${res.status}`;
+        try {
+          const data = await res.json();
+          if (data?.error) message = data.error;
+        } catch {
+          // 忽略非 JSON 响应
+        }
+        throw new Error(message);
+      }
+
+      const data = (await res.json()) as GapAnalysis;
+      setGap(data);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "分析失败");
+    } finally {
+      setAnalyzing(false);
+    }
   }
 
   function toggleVoice() {
@@ -340,19 +396,26 @@ export default function InterviewApp() {
       </header>
 
       {!started ? (
-        <InterviewSetup
-          persona={persona}
-          resume={resume}
-          jd={jd}
-          uploadingResume={uploadingResume}
-          recognizingImage={recognizingImage}
-          onPersonaChange={setPersona}
-          onResumeChange={setResume}
-          onJdChange={setJd}
-          onResumeFile={handleResumeFile}
-          onJdImage={handleJdImage}
-          onStart={handleStart}
-        />
+        <div className="space-y-5">
+          <InterviewSetup
+            persona={persona}
+            resume={resume}
+            jd={jd}
+            uploadingResume={uploadingResume}
+            recognizingImage={recognizingImage}
+            onPersonaChange={setPersona}
+            onResumeChange={setResume}
+            onJdChange={setJd}
+            onResumeFile={handleResumeFile}
+            onJdImage={handleJdImage}
+            onStart={handleStart}
+          />
+          <GapAnalysisPanel
+            gap={gap}
+            analyzing={analyzing}
+            onAnalyze={handleGapAnalysis}
+          />
+        </div>
       ) : (
         <div className="space-y-5">
           <ChatPanel
@@ -369,7 +432,7 @@ export default function InterviewApp() {
             onReset={handleReset}
             onSpeak={speak}
           />
-          {report && <ReportPanel report={report} />}
+          {report && <ReportPanel report={report} history={history} />}
         </div>
       )}
     </main>
