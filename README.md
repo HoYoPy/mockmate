@@ -2,6 +2,10 @@
 
 面向「2026 第九届传智杯 AI WEB 网页开发挑战赛」的参赛作品。候选人上传简历和目标岗位 JD，选择面试官风格，AI 以多轮对话方式进行追问，并生成结构化复盘报告。
 
+> **在线体验**：https://mockmate-one-pink.vercel.app/
+> **代码仓库**：https://github.com/HoYoPy/mockmate
+> **体验说明**：无需登录，打开即可上传简历 / JD，开始模拟面试。
+
 ## 一、项目介绍
 
 **产品定位**：面向应届生的 AI 模拟面试训练与复盘工具。
@@ -26,6 +30,18 @@
 - 语音闭环：语音输入（Web Speech API）+ 面试官语音朗读（TTS）
 - 基于 OpenAI 兼容接口，可切换 DeepSeek / 智谱 / 通义千问等模型
 
+### 项目截图
+
+| 系统首页 | 简历 × 岗位差距分析 |
+|---|---|
+| ![系统首页](docs/image.png) | ![差距分析](docs/image-1.png) |
+
+| 模拟面试对话 | 能力雷达图与复盘报告 |
+|---|---|
+| ![模拟面试](docs/image-2.png) | ![复盘报告](docs/image-3.png) |
+
+![能力成长曲线](docs/image-4.png)
+
 ## 二、技术架构
 
 ```text
@@ -33,18 +49,21 @@
    │  用户输入简历 / JD / 面试回答 / 语音
    ▼
 Next.js App Router
-   ├── POST /api/chat        对话接口
-   └── POST /api/report      结构化复盘接口
+   ├── POST /api/chat            对话（Agent + RAG + SSE）
+   ├── POST /api/report          结构化复盘报告
+   ├── POST /api/gap-analysis    简历 × 岗位差距分析
+   └── POST /api/parse-resume    简历文件解析
    ▼
-/api/chat 路由（Node.js）
-   │  1. retrieveQuestions：根据简历 + JD 检索题库（RAG）
-   │  2. buildSystemPrompt：注入面试官提示词 + 检索结果
-   │  3. 调用 OpenAI 兼容大模型 API（stream: true）
+服务端逻辑层
+   ├── RAG 检索：题库 + TF-IDF 向量 + 关键词重排
+   ├── Agent 工具循环：评估 → 选题 → 追问 → 收尾
+   ├── 内容安全：敏感信息脱敏 + 违规内容拦截
+   └── 多模型降级：主模型失败自动切换
    ▼
-OpenAI 兼容接口（OpenAI / DeepSeek / 智谱 / 通义千问）
-   │  流式返回 token / 返回结构化复盘 JSON
+OpenAI 兼容接口（DeepSeek / 智谱 / OpenAI）
+   │  SSE 流式 token / 结构化 JSON
    ▼
-ReadableStream 逐字渲染 + 能力雷达图展示
+前端流式渲染 + 能力雷达图 + 成长曲线
 ```
 
 | 层 | 技术选型 |
@@ -64,6 +83,13 @@ ReadableStream 逐字渲染 + 能力雷达图展示
 | 部署 | Vercel |
 
 ## 三、安装与运行
+
+**快速体验（无需本地部署）**
+
+1. 打开在线地址：https://mockmate-one-pink.vercel.app/
+2. 上传或粘贴简历，填写岗位 JD
+3. 点「开始分析」查看差距，再点「开始模拟面试」
+4. 回答几轮后点「结束并生成复盘报告」
 
 **环境要求**：Node.js 20+（见 `.nvmrc`）、npm。
 
@@ -197,7 +223,7 @@ git init
 git add .
 git commit -m "feat: AI 智能面试教练骨架"
 git branch -M main
-git remote add origin https://github.com/你的用户名/mockmate.git
+git remote add origin https://github.com/HoYoPy/mockmate.git
 git push -u origin main
 ```
 
@@ -206,7 +232,7 @@ git push -u origin main
 1. vercel.com 用 GitHub 登录 → Add New → Project → 导入 `mockmate` 仓库。
 2. 框架自动识别为 Next.js，直接 Deploy。
 3. 在 Project Settings → Environment Variables 添加 `OPENAI_API_KEY`、`OPENAI_BASE_URL`、`OPENAI_MODEL`。
-4. Redeploy 后打开 `https://你的项目.vercel.app` 即可在线运行。
+4. Redeploy 后打开 `https://mockmate-one-pink.vercel.app/` 即可在线运行。
 
 ### 3. 注意事项
 
@@ -221,3 +247,11 @@ git push -u origin main
 - `docs/技术文档-要点.md`：社会价值、商业模式、市场空间与文档大纲
 - `docs/演示视频脚本.md`：5-8 分钟演示视频的拍摄脚本
 - `docs/提交材料清单.md`：提交前检查项
+
+## 九、常见问题
+
+- **需要登录吗？** 不需要，打开在线地址即可体验。
+- **本地运行需要什么？** Node.js 20+，以及一个 OpenAI 兼容接口的 API Key。
+- **支持哪些模型？** DeepSeek、智谱、OpenAI 等，通过 `OPENAI_BASE_URL` 和 `OPENAI_MODEL` 切换。
+- **数据存在哪里？** 面试成绩只保存在浏览器 `localStorage`，不会上传到服务器。
+- **项目截图和文档在哪里？** 都在 `docs/` 目录下。
