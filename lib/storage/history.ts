@@ -2,6 +2,7 @@ import type { HistoryRecord } from "@/lib/interview/types";
 
 const STORAGE_KEY = "mockmate:history";
 
+// 读取最近 12 次面试成绩，localStorage 不可用时返回空数组。
 export function loadHistory(): HistoryRecord[] {
   if (typeof window === "undefined") return [];
   try {
@@ -18,6 +19,7 @@ export function loadHistory(): HistoryRecord[] {
   }
 }
 
+// 追加一条成绩并只保留最近 12 次，避免 localStorage 无限增长。
 export function saveHistory(record: HistoryRecord): HistoryRecord[] {
   const history = [...loadHistory(), record].slice(-12);
   try {

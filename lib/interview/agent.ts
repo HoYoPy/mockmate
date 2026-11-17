@@ -96,6 +96,13 @@ function executeTool(
   return { ok: false, note: `未知工具：${name}` };
 }
 
+/**
+ * 工具调用 Agent 循环：
+ * 1. 让模型决定是否调用工具；
+ * 2. 服务端执行工具并把结果作为 tool 消息回填；
+ * 3. 直到模型输出纯文本，或达到最大步数。
+ * 任何一步失败都会由上层回退到普通流式对话。
+ */
 export async function runAgentLoop(
   client: OpenAI,
   model: string,

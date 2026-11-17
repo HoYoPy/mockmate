@@ -55,6 +55,10 @@ export function createClient(config: ModelConfig): OpenAI {
   });
 }
 
+/**
+ * 主模型优先执行；失败后按 OPENAI_FALLBACKS 顺序自动切换备用模型。
+ * 备用配置格式：JSON 数组，每项包含 apiKey / baseURL / model。
+ */
 export async function runWithFallback<T>(
   fn: (client: OpenAI, model: string) => Promise<T>
 ): Promise<T> {

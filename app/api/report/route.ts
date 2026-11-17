@@ -29,6 +29,12 @@ function maskReport(report: InterviewReport): InterviewReport {
   };
 }
 
+/**
+ * 生成结构化复盘报告：
+ * 优先使用 JSON 模式强约束输出；
+ * 若服务不支持或解析失败，则去掉约束重试一次；
+ * 主模型失败时由 runWithFallback 自动切换备用模型。
+ */
 export async function POST(req: Request) {
   try {
     const { messages, config } = (await req.json()) as ReportRequestBody;

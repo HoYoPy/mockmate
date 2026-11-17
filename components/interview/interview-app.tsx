@@ -304,6 +304,10 @@ export default function InterviewApp() {
   }
 
   async function handleResumeFile(file: File) {
+    if (file.size > 10 * 1024 * 1024) {
+      alert("文件不能超过 10MB，请压缩后重试");
+      return;
+    }
     setUploadingResume(true);
     try {
       const formData = new FormData();
@@ -323,6 +327,10 @@ export default function InterviewApp() {
   }
 
   async function handleJdImage(file: File) {
+    if (file.size > 10 * 1024 * 1024) {
+      alert("图片不能超过 10MB，请压缩后重试");
+      return;
+    }
     setRecognizingImage(true);
     try {
       const Tesseract = (await import("tesseract.js")).default as {

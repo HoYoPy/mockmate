@@ -68,5 +68,74 @@
 
   {"id":"prod-01","category":"产品","job":["产品"],"persona":["hr"],"skills":["用户需求"],"difficulty":2,"keywords":["用户","需求","痛点","场景"],"question":"你怎么判断一个需求是真实痛点还是伪需求？","points":["用户洞察","需求分析","判断力"]},
   {"id":"prod-02","category":"产品","job":["产品"],"persona":["hr"],"skills":["数据分析"],"difficulty":2,"keywords":["数据","指标","转化","留存"],"question":"给你一个产品数据指标下滑的问题，你会怎么分析？","points":["数据分析","拆解能力","业务理解"]},
-  {"id":"prod-03","category":"产品","job":["产品"],"persona":["stress"],"skills":["优先级"],"difficulty":2,"keywords":["优先级","资源","取舍","版本"],"question":"资源有限时，你会怎么给需求排优先级？","points":["优先级判断","取舍能力","产品思维"]}
+  {"id":"prod-03","category":"产品","job":["产品"],"persona":["stress"],"skills":["优先级"],"difficulty":2,"keywords":["优先级","资源","取舍","版本"],"question":"资源有限时，你会怎么给需求排优先级？","points":["优先级判断","取舍能力","产品思维"]},
+
+  {"id":"fe-17","category":"技术","job":["前端"],"persona":["technical"],"skills":["大文件上传"],"difficulty":3,"keywords":["大文件","分片","上传","断点续传"],"question":"大文件上传你会怎么设计分片和断点续传？","points":["分片策略","断点续传","失败重试"]},
+  {"id":"fe-18","category":"技术","job":["前端"],"persona":["technical"],"skills":["前端监控"],"difficulty":2,"keywords":["监控","错误","上报","性能"],"question":"前端线上错误和性能指标你会怎么监控？","points":["错误采集","性能指标","上报策略"]},
+  {"id":"fe-19","category":"技术","job":["前端"],"persona":["technical"],"skills":["权限控制"],"difficulty":2,"keywords":["权限","路由","按钮","鉴权"],"question":"前端路由权限和按钮级权限你会怎么实现？","points":["路由守卫","权限模型","安全性"]},
+  {"id":"fe-20","category":"技术","job":["前端"],"persona":["technical"],"skills":["复杂表单"],"difficulty":2,"keywords":["表单","校验","联动","受控"],"question":"复杂表单的校验和联动你是怎么设计的？","points":["表单状态","校验策略","可维护性"]},
+  {"id":"fe-21","category":"技术","job":["前端"],"persona":["technical"],"skills":["动画性能"],"difficulty":2,"keywords":["动画","卡顿","requestanimationframe","性能"],"question":"页面动画卡顿你会怎么定位和优化？","points":["渲染性能","动画方案","性能分析"]},
+  {"id":"fe-22","category":"技术","job":["前端"],"persona":["technical"],"skills":["SSR","SEO"],"difficulty":3,"keywords":["ssr","seo","首屏","服务端渲染"],"question":"SSR 解决了什么问题？它带来哪些额外复杂度？","points":["SSR 原理","SEO 与首屏","复杂度权衡"]},
+  {"id":"fe-23","category":"技术","job":["前端"],"persona":["technical"],"skills":["响应式"],"difficulty":2,"keywords":["响应式","移动端","适配","布局"],"question":"移动端适配你做过哪些方案？各自优缺点是什么？","points":["适配方案","兼容性","布局能力"]},
+  {"id":"fe-24","category":"技术","job":["前端"],"persona":["technical"],"skills":["无障碍"],"difficulty":2,"keywords":["无障碍","可访问性","aria","键盘"],"question":"你了解哪些前端无障碍（可访问性）实践？","points":["可访问性意识","语义化","键盘操作"]},
+
+  {"id":"be-13","category":"技术","job":["后端"],"persona":["technical"],"skills":["限流熔断"],"difficulty":3,"keywords":["限流","熔断","降级","高可用"],"question":"限流、熔断、降级分别解决什么问题？","points":["稳定性设计","高可用","故障隔离"]},
+  {"id":"be-14","category":"技术","job":["后端"],"persona":["technical"],"skills":["可观测性"],"difficulty":2,"keywords":["日志","监控","链路","追踪"],"question":"线上服务你会怎么做日志、监控和链路追踪？","points":["可观测性","问题定位","工程实践"]},
+  {"id":"be-15","category":"技术","job":["后端"],"persona":["technical"],"skills":["分库分表"],"difficulty":3,"keywords":["分库","分表","数据量","扩展"],"question":"什么情况下需要分库分表？分片键怎么选？","points":["数据扩展","分片策略","一致性"]},
+  {"id":"be-16","category":"技术","job":["后端"],"persona":["technical"],"skills":["接口版本"],"difficulty":2,"keywords":["接口","版本","兼容","升级"],"question":"接口升级时如何保证老版本客户端的兼容？","points":["版本管理","兼容策略","发布流程"]},
+  {"id":"be-17","category":"技术","job":["后端"],"persona":["technical"],"skills":["对象存储"],"difficulty":2,"keywords":["文件","上传","对象存储","oss"],"question":"文件上传服务你会怎么设计？如何保证安全？","points":["存储方案","文件校验","安全控制"]},
+  {"id":"be-18","category":"技术","job":["后端"],"persona":["technical"],"skills":["定时任务"],"difficulty":2,"keywords":["定时任务","幂等","调度","重复执行"],"question":"定时任务如何避免重复执行和数据不一致？","points":["幂等设计","调度可靠性","一致性"]},
+  {"id":"be-19","category":"技术","job":["后端"],"persona":["technical"],"skills":["缓存一致性"],"difficulty":3,"keywords":["缓存","一致性","更新","失效"],"question":"数据库和缓存的一致性你会怎么保证？","points":["缓存更新策略","一致性权衡","异常处理"]},
+  {"id":"be-20","category":"技术","job":["后端"],"persona":["technical"],"skills":["RPC"],"difficulty":3,"keywords":["rpc","微服务","通信","接口"],"question":"微服务之间通信你会选 RPC 还是 HTTP？为什么？","points":["通信选型","性能与治理","服务边界"]},
+
+  {"id":"ai-11","category":"技术","job":["AI","算法"],"persona":["technical"],"skills":["Embedding"],"difficulty":3,"keywords":["embedding","向量","相似度","语义"],"question":"Embedding 向量检索的原理是什么？如何评估检索质量？","points":["向量表示","相似度检索","评估指标"]},
+  {"id":"ai-12","category":"技术","job":["AI","算法"],"persona":["technical"],"skills":["Agent"],"difficulty":3,"keywords":["agent","多智能体","规划","工具"],"question":"多智能体系统相比单 Agent 有哪些优势和难点？","points":["任务分解","协作机制","复杂度控制"]},
+  {"id":"ai-13","category":"技术","job":["AI","算法"],"persona":["technical"],"skills":["幻觉控制"],"difficulty":3,"keywords":["幻觉","可控","引用","校验"],"question":"大模型幻觉你会怎么检测和缓解？","points":["幻觉来源","引用与校验","兜底策略"]},
+  {"id":"ai-14","category":"技术","job":["AI","算法"],"persona":["technical"],"skills":["模型评估"],"difficulty":2,"keywords":["评估","ab测试","指标","效果"],"question":"线上 AI 功能你会怎么设计评估和 A/B 测试？","points":["评估指标","实验设计","业务价值"]},
+  {"id":"ai-15","category":"技术","job":["AI","算法"],"persona":["technical"],"skills":["推理成本"],"difficulty":2,"keywords":["成本","token","缓存","推理"],"question":"大模型应用的推理成本你会怎么优化？","points":["成本意识","缓存与压缩","模型选型"]},
+  {"id":"ai-16","category":"技术","job":["AI","算法"],"persona":["technical"],"skills":["多模态RAG"],"difficulty":3,"keywords":["多模态","rag","图像","检索"],"question":"多模态 RAG 相比文本 RAG 难在哪里？","points":["跨模态检索","对齐问题","工程复杂度"]},
+
+  {"id":"data-01","category":"技术","job":["数据"],"persona":["technical"],"skills":["SQL"],"difficulty":2,"keywords":["sql","窗口函数","排名","分组"],"question":"SQL 窗口函数适合解决什么问题？举个例子。","points":["SQL 能力","分析思路","场景理解"]},
+  {"id":"data-02","category":"技术","job":["数据"],"persona":["technical"],"skills":["数据清洗"],"difficulty":2,"keywords":["数据清洗","缺失值","异常值","重复"],"question":"拿到一份脏数据，你会怎么做数据清洗？","points":["数据质量","清洗流程","严谨性"]},
+  {"id":"data-03","category":"技术","job":["数据"],"persona":["technical"],"skills":["指标体系"],"difficulty":3,"keywords":["指标","体系","北极星","拆解"],"question":"如果让你为一个产品设计指标体系，你会怎么做？","points":["指标拆解","业务理解","体系化思维"]},
+  {"id":"data-04","category":"技术","job":["数据"],"persona":["technical"],"skills":["AB测试"],"difficulty":3,"keywords":["ab测试","显著性","样本","实验"],"question":"A/B 测试的流程和常见坑有哪些？","points":["实验设计","统计显著性","业务判断"]},
+  {"id":"data-05","category":"技术","job":["数据"],"persona":["technical"],"skills":["埋点"],"difficulty":2,"keywords":["埋点","事件","数据采集","规范"],"question":"埋点方案你会怎么设计，如何保证数据质量？","points":["埋点规范","数据采集","质量保障"]},
+  {"id":"data-06","category":"技术","job":["数据"],"persona":["technical"],"skills":["可视化"],"difficulty":2,"keywords":["可视化","图表","数据","展示"],"question":"做数据可视化时，你如何选择图表和呈现重点？","points":["可视化表达","信息层次","用户理解"]},
+  {"id":"data-07","category":"技术","job":["数据"],"persona":["technical"],"skills":["用户画像"],"difficulty":2,"keywords":["用户画像","标签","分群","行为"],"question":"用户画像的标签体系你会怎么设计？","points":["标签体系","用户分群","业务应用"]},
+  {"id":"data-08","category":"技术","job":["数据"],"persona":["technical"],"skills":["数据质量"],"difficulty":2,"keywords":["数据质量","校验","监控","口径"],"question":"如何保证数据口径一致和数据质量？","points":["口径管理","数据校验","监控机制"]},
+
+  {"id":"test-01","category":"技术","job":["测试"],"persona":["technical"],"skills":["测试用例"],"difficulty":2,"keywords":["测试用例","边界","等价类","场景"],"question":"一个功能你会怎么设计测试用例？","points":["用例设计","边界条件","覆盖率"]},
+  {"id":"test-02","category":"技术","job":["测试"],"persona":["technical"],"skills":["单元测试"],"difficulty":2,"keywords":["单元测试","mock","断言","覆盖率"],"question":"单元测试应该测什么？哪些不适合单测？","points":["测试边界","Mock 使用","可测试性"]},
+  {"id":"test-03","category":"技术","job":["测试"],"persona":["technical"],"skills":["接口测试"],"difficulty":2,"keywords":["接口测试","postman","断言","参数"],"question":"接口测试你会重点关注哪些方面？","points":["参数与边界","异常场景","自动化"]},
+  {"id":"test-04","category":"技术","job":["测试"],"persona":["technical"],"skills":["性能测试"],"difficulty":3,"keywords":["性能测试","并发","压测","瓶颈"],"question":"性能测试怎么做？如何定位瓶颈？","points":["压测方案","指标分析","瓶颈定位"]},
+  {"id":"test-05","category":"技术","job":["测试"],"persona":["technical"],"skills":["自动化测试"],"difficulty":3,"keywords":["自动化","selenium","playwright","回归"],"question":"自动化测试的投入产出比你怎么评估？","points":["自动化策略","维护成本","回归价值"]},
+  {"id":"test-06","category":"技术","job":["测试"],"persona":["technical"],"skills":["缺陷管理"],"difficulty":2,"keywords":["bug","缺陷","优先级","复现"],"question":"发现一个难复现的 Bug，你会怎么推进解决？","points":["问题复现","沟通协作","缺陷管理"]},
+  {"id":"test-07","category":"技术","job":["测试"],"persona":["technical"],"skills":["回归测试"],"difficulty":2,"keywords":["回归","发布","风险","测试范围"],"question":"版本发布前你会如何确定回归测试范围？","points":["风险判断","测试范围","发布质量"]},
+
+  {"id":"ops-01","category":"技术","job":["运维","后端"],"persona":["technical"],"skills":["CI/CD"],"difficulty":2,"keywords":["ci","cd","流水线","发布"],"question":"你们的 CI/CD 流水线包含哪些步骤？","points":["流水线设计","自动化","发布质量"]},
+  {"id":"ops-02","category":"技术","job":["运维","后端"],"persona":["technical"],"skills":["Docker"],"difficulty":2,"keywords":["docker","镜像","容器","环境"],"question":"Docker 镜像如何做到体积小、构建快？","points":["镜像优化","分层缓存","工程实践"]},
+  {"id":"ops-03","category":"技术","job":["运维","后端"],"persona":["technical"],"skills":["Kubernetes"],"difficulty":3,"keywords":["k8s","kubernetes","pod","调度"],"question":"Kubernetes 解决了什么问题？核心概念有哪些？","points":["容器编排","核心概念","运维能力"]},
+  {"id":"ops-04","category":"技术","job":["运维","后端"],"persona":["technical"],"skills":["监控告警"],"difficulty":2,"keywords":["监控","告警","日志","指标"],"question":"线上监控告警如何避免告警风暴？","points":["告警设计","降噪","应急响应"]},
+  {"id":"ops-05","category":"技术","job":["运维","后端"],"persona":["technical"],"skills":["灰度发布"],"difficulty":3,"keywords":["灰度","发布","回滚","流量"],"question":"灰度发布和回滚方案你会怎么设计？","points":["发布策略","风险控制","回滚能力"]},
+
+  {"id":"sec-01","category":"技术","job":["安全","前端","后端"],"persona":["technical"],"skills":["XSS"],"difficulty":2,"keywords":["xss","转义","csp","安全"],"question":"XSS 有哪几种类型？分别怎么防护？","points":["XSS 类型","输出转义","CSP"]},
+  {"id":"sec-02","category":"技术","job":["安全","前端","后端"],"persona":["technical"],"skills":["CSRF"],"difficulty":2,"keywords":["csrf","token","cookie","安全"],"question":"CSRF 的攻击原理是什么？如何防护？","points":["CSRF 原理","Token 校验","SameSite"]},
+  {"id":"sec-03","category":"技术","job":["安全","后端"],"persona":["technical"],"skills":["SQL注入"],"difficulty":2,"keywords":["sql注入","参数化","预编译","安全"],"question":"SQL 注入如何产生？参数化查询为什么能防护？","points":["注入原理","参数化查询","输入校验"]},
+  {"id":"sec-04","category":"技术","job":["安全","通用"],"persona":["technical"],"skills":["数据脱敏"],"difficulty":2,"keywords":["脱敏","隐私","手机号","日志"],"question":"日志和数据库中敏感信息应该怎么脱敏？","points":["隐私保护","脱敏策略","合规意识"]},
+  {"id":"sec-05","category":"技术","job":["安全","通用"],"persona":["technical"],"skills":["权限最小化"],"difficulty":2,"keywords":["权限","最小化","越权","访问控制"],"question":"如何防止水平越权和垂直越权？","points":["权限模型","越权防护","访问控制"]},
+
+  {"id":"mobile-01","category":"技术","job":["移动端","前端"],"persona":["technical"],"skills":["移动端性能"],"difficulty":2,"keywords":["移动端","性能","启动","卡顿"],"question":"移动端页面性能优化你会关注哪些指标？","points":["启动性能","渲染性能","网络优化"]},
+  {"id":"mobile-02","category":"技术","job":["移动端","前端"],"persona":["technical"],"skills":["移动端适配"],"difficulty":2,"keywords":["适配","rem","vw","安全区"],"question":"移动端适配和安全区你是怎么处理的？","points":["适配方案","安全区","兼容性"]},
+  {"id":"mobile-03","category":"技术","job":["移动端","前端"],"persona":["technical"],"skills":["离线缓存"],"difficulty":2,"keywords":["离线","缓存","serviceworker","存储"],"question":"移动端离线缓存有哪些方案？如何更新缓存？","points":["缓存策略","离线能力","版本更新"]},
+  {"id":"mobile-04","category":"技术","job":["移动端"],"persona":["technical"],"skills":["消息推送"],"difficulty":2,"keywords":["推送","消息","通知","到达率"],"question":"移动端消息推送如何保证到达率和用户体验？","points":["推送渠道","到达率","用户打扰"]},
+
+  {"id":"proj-09","category":"项目","job":["通用"],"persona":["hr"],"skills":["项目复盘"],"difficulty":2,"keywords":["复盘","总结","改进","经验"],"question":"项目结束后你会怎么做复盘？","points":["复盘方法","改进闭环","成长意识"]},
+  {"id":"proj-10","category":"项目","job":["通用"],"persona":["stress"],"skills":["需求变更"],"difficulty":2,"keywords":["需求变更","排期","沟通","风险"],"question":"项目中途需求频繁变更，你会怎么处理？","points":["变更管理","沟通协调","风险控制"]},
+  {"id":"proj-11","category":"项目","job":["通用"],"persona":["technical"],"skills":["性能优化项目"],"difficulty":3,"keywords":["性能优化","指标","收益","方案"],"question":"讲一个你主导的性能优化项目，收益如何量化？","points":["优化思路","数据量化","项目主导"]},
+  {"id":"proj-12","category":"项目","job":["通用"],"persona":["technical","hr"],"skills":["从0到1"],"difficulty":3,"keywords":["从0到1","架构","选型","落地"],"question":"如果让你从 0 到 1 做一个产品，你会怎么推进？","points":["全局思维","技术选型","落地能力"]},
+
+  {"id":"beh-07","category":"行为","job":["通用"],"persona":["hr"],"skills":["职业选择"],"difficulty":1,"keywords":["选择","城市","行业","岗位"],"question":"你在选择工作机会时最看重哪些因素？","points":["职业价值观","稳定性","自我认知"]},
+  {"id":"beh-08","category":"行为","job":["通用"],"persona":["hr"],"skills":["学习挫折"],"difficulty":2,"keywords":["学习","挫折","困难","坚持"],"question":"讲一次你学习新技术遇到挫折并坚持下来的经历。","points":["学习能力","韧性","行动力"]},
+  {"id":"beh-09","category":"行为","job":["通用"],"persona":["hr"],"skills":["团队贡献"],"difficulty":2,"keywords":["团队","贡献","主动","协作"],"question":"你为团队做过哪些超出本职工作的贡献？","points":["主动性","团队意识","影响力"]},
+  {"id":"beh-10","category":"行为","job":["通用"],"persona":["hr"],"skills":["时间管理"],"difficulty":1,"keywords":["时间管理","优先级","计划","效率"],"question":"同时有多项任务时，你怎么安排优先级？","points":["时间管理","优先级判断","执行效率"]}
 ]

@@ -27,6 +27,7 @@ function encodeSSE(text: string): Uint8Array {
   return new TextEncoder().encode(`data: ${JSON.stringify(text)}\n\n`);
 }
 
+// 把一段完整文本按小块转成 SSE 事件，前端可保持流式渲染体验。
 function streamText(text: string): Response {
   const encoder = new TextEncoder();
   const safe = guardOutput(text);
@@ -47,6 +48,7 @@ function streamText(text: string): Response {
   return new Response(readable, { headers: SSE_HEADERS });
 }
 
+// Agent 不可用时，回退到普通模型流式补全；同样使用 SSE 协议。
 async function streamFallback(
   history: ChatCompletionMessageParam[]
 ): Promise<Response> {
@@ -91,6 +93,13 @@ async function streamFallback(
   throw new Error("所有模型均不可用");
 }
 
+/**
+ * 面试对话主入口：
+ * 1. 内容安全过滤；
+ * 2. RAG 检索并注入提示词；
+ * 3. 优先走工具调用 Agent；
+ * 4. Agent 失败时回退到普通流式对话。
+ */
 export async function POST(req: Request) {
   try {
     const { messages, config } = (await req.json()) as ChatRequestBody;

@@ -4,6 +4,12 @@ export interface GuardResult {
   reason?: string;
 }
 
+/**
+ * 本地内容安全规则：
+ * - 敏感信息做脱敏，避免手机号/邮箱/密钥进入模型或日志；
+ * - 明确违规内容直接拦截；
+ * - 模型输出中的不友好用语统一替换，作为“压力面不攻击个人”的代码兜底。
+ */
 const SENSITIVE_RULES: {
   name: string;
   regex: RegExp;
